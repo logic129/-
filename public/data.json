@@ -1,0 +1,33 @@
+{
+    "put": [{
+        "ID":1,
+        "name": "车位",
+        "fnum": 2,
+        "status":2
+    },{
+        "ID":2,
+        "name": "车位",
+        "fnum": 2,
+        "status":2
+    },{
+        "ID":3,
+        "name": "车位",
+        "fnum": 2,
+        "status":2
+    },{
+        "ID":4,
+        "name": "车位",
+        "fnum": 2,
+        "status":2
+    },{
+        "ID":5,
+        "name": "车位",
+        "fnum": 2,
+        "status":2
+    },{
+        "ID":6,
+        "name": "车位",
+        "fnum": 2,
+        "status":2
+    }]
+}

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心</title>
+    <link rel='stylesheet' href="/stylesheets/bootstrap.css">
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel='stylesheet' href='/stylesheets/home.css' />
+    <script src='/parkmap/lib/esmap.min.js'></script>
+    <script src="/javascripts/index.js"></script>
+</head>
+<body>
+    <div><span><span style="font-weight: bold;"><%= user.name %></span>, 欢迎登录！</span><a class="btn" style="width:6rem;position:relative;left:30rem;" href="/login">退出</a></div>
+    <br/>
+    <div style="height: 80rem;" id="map-container"></div>
+    <div style="margin-top: 1rem;">
+        <ul id='displayli'>
+            <li><span id='redpoint'></span><span>占用车位</span></li>
+            <li><span id='greenpoint'></span><span>闲置车位</span></li>
+        </ul>
+        <div id='piccontainer'>        
+            <div style="position: absolute;" id='pictmove'>共<span class="wordcol">200</span>个车位，闲置车位共<span id='allnum' class="wordcol"></span>个，B2:<span id='b2num' class="wordcol"></span>个，B1:<span id='b1num' class="wordcol"></span>个</div>
+        </div>
+    </div>
+    <button id="btn2D" class="btn btn-primary">2D</button>
+    <button id="btn3D" class="btn btn-default">3D</button>
+    <br/>
+    <span id='cer_display' style="color: brown;font-weight: bold;display: inline-block;margin: 6rem 0;"></span>
+    <br/>
+    <button id="navigate" class="btn btn-success" style="display: none;">定位</button>
+    <button id="leave" class="btn btn-danger" style="display: none;">离开</button>
+<script>
+    let b1num=document.getElementById('b1num'),
+    b2num=document.getElementById('b2num'),
+    allnum=document.getElementById('allnum'),
+    pictmove=document.getElementById('pictmove'),
+    cer_display=document.getElementById('cer_display'),
+    navigate=document.getElementById('navigate'),
+    leave=document.getElementById('leave');
+    let length=240,freenum=0,busynum=0,num1=0,num2=0;
+
+    //从数据库获得的车位信息数组
+    var array='<%= JSON.stringify(obj) %>';
+    array=array.replace(new RegExp('&#34;','g'),'\"');
+    array=eval('('+array+')');
+    // console.log(array);
+    //该用户信息
+    var some='<%= JSON.stringify(some) %>';
+    some=some.replace(new RegExp('&#34;','g'),'\"');
+    some=eval('('+some+')');
+    if(some['location']!=null){
+        cer_display.innerText='您的车位为'+some['location'];
+        navigate.style.display='inline-block';
+        leave.style.display='inline-block';
+    }else{
+        cer_display.innerText='';
+        navigate.style.display='none';
+        leave.style.display='none';
+    }
+
+    //轮播图
+    function picFun(){
+        let left=pictmove.style.left;
+        let len=left.length;
+        left=Number(left.slice(0,len-2));
+        left=left<-length?length:left;
+        pictmove.style.left=left-10+'px';
+        // console.log(pictmove.style.left,length)
+    }
+    setInterval(function(){
+        picFun();
+    },500);
+
+    //初始化地图
+    var map = new esmap.ESMap({
+        container:document.getElementById('map-container'), //地图显示容器
+        mapDataSrc: "/parkmap/data", //地图数据位置，与推荐目录相同可省略
+        mapThemeSrc: "/parkmap/data/theme", //地图主题位置，与推荐目录相同可省略 
+        focusAlphaMode: true,               //对不可见图层启用透明设置 默认为true
+        focusAnimateMode: true,            //开启聚焦层切换的动画显示
+        focusAlpha: 1,                    //对不聚焦图层启用透明设置，当focusAlphaMode = true时有效
+        // moveToAnimateMode: true,           //地图定位跳转动画设置
+        // defaultScaleLevel: 12,              //设置默认显示级别,1到24之间的整数
+        // modelSelectedEffect: true,          //支持单击模型高亮，false为单击时模型不高亮
+        visibleFloors: [1,2,3],             //初始显示楼层
+        focusFloor: 1,                      //初始聚焦楼层
+        // themeID: '1004',                    //自定义样式主题ID
+        // viewMode: esmap.ESViewMode.MODE_3D, 	//初始二维还是三维状态
+        // compassSize :50,     //指南针
+        // defaultAngle:180,
+        token:"escope",  //打开地图对应的token
+    });
+    map.showCompass = true;     //显示指北针    
+    map.openMapById(10005);                 //根据ID打开地图
+
+    //初始化导航对象
+    var navi = new esmap.ESNavigation({
+        map: map,
+        locationMarkerUrl: '/parkmap/BaseMap/image/pointer.png',   //定位标注图片地址
+        locationMarkerSize: 150,    //定位标注尺寸大小
+        speed: 5,   //模拟导航速度
+        followAngle: true,  //地图是否跟随旋转
+        followPosition: true,  //地图视角是否跟随位置
+        followGap:3,      //导航视角跟随间隔(单位:/s)
+        tiltAngle: 30,   //模拟导航时的倾斜角
+        audioPlay:true,  //是否开启语音播报
+        // scaleLevel:0,   //模拟导航时的放大等级
+        // mode:2,         //mode=1:人行(默认),mode=2：车行
+        offsetHeight: 1,    //定位标注的高度
+        ladderType:1,  //跨层方案选择。1:距离最近(默认),2:电梯 3.楼梯 4.扶梯
+        lineStyle: {   //路径规划线样式配置
+            color: '#33cc61',
+            //设置线为导航线样式
+            lineType: esmap.ESLineType.ESARROW,
+            // lineType: esmap.ESLineType.FULL,            
+            lineWidth: 6,		// 设置导航线的宽度
+            offsetHeight: 0.5,	// 设置导航线的高度
+            smooth: true,		// 设置导航线的转角线平滑效果
+            seeThrough: false,	// 设置导航线的穿透楼层地板总是显示的效果
+            noAnimate: false	// 设置导航线的动画效果
+            //设置边线的颜色   
+            // godEdgeColor: '#920000'
+            //设置箭头颜色
+            // godArrowColor: "#ff0000"
+        },
+    });
+
+
+    //***切换2d和3d模式
+    //2维模式
+    let td=document.getElementById('btn2D'),sd=document.getElementById('btn3D');
+
+    td.onclick=function(){
+        map.viewMode = esmap.ESViewMode.MODE_2D;//2维模式
+    }
+    //3维模式
+    sd.onclick=function(){
+        map.viewMode = esmap.ESViewMode.MODE_3D;//3维模式
+    }
+
+    var ctlOpt = new esmap.ESControlOptions({
+        position: esmap.ESControlPositon.RIGHT_TOP, 
+        imgURL: "/parkmap/BaseMap/image/wedgets/"
+    });
+
+
+    map.on('loadComplete', function () {
+        //检索字段
+        var queryFloors = "all"   //全楼层检索。也可以传入某个楼层，或者一组楼层(数组)
+
+        //1.在地图加载完成事件中新建楼层控制控件对象
+        //创建楼层控件
+        floorControl = new esmap.ESScrollFloorsControl(map, ctlOpt);
+
+        //2.在地图加载完成事件中新建控件对象
+        //创建放大、缩小控件
+        var zoomControl = new esmap.ESZoomControl(map, ctlOpt1);
+
+        var color_array=[];
+        color_array[0]=[],color_array[1]=[];
+
+        //规划路径函数
+        function planroute(startx,starty,startfnum,endx,endy,endfnum){
+            // 确定起点
+            navi.setStartPoint({
+                x: startx||12728400.7413333,
+                y: starty||3551647.8182984,
+                fnum: 1,
+                height: 1,
+                url: '/parkmap/BaseMap/image/start.png',
+                size: 64
+            });
+            //确定终点
+            navi.setEndPoint({
+                x: endx,
+                y: endy,
+                fnum: endfnum,
+                height: 1,
+                url: '/parkmap/BaseMap/image/end.png',
+                size: 64
+            });
+            navi.drawNaviLine();
+        }
+
+        //寻找自己的车位事件
+        navigate.onclick=function(){
+            //该用户选择的车位信息
+            var queryParams = {
+                nodeType : 5,
+                typeID:0,
+                name : some['location'],
+                keyword:'车位'
+            };
+            //查询该车位信息
+            esmap.ESMapUtil.search(map, [1,2], queryParams, function (e) {
+                console.log(e[0]);
+                planroute(undefined,undefined,undefined,e[0].mapCoord.x,e[0].mapCoord.y,e[0].FloorNum);
+            })
+        }
+
+        //离开车位事件
+        leave.onclick=function(){
+            //该用户选择的车位信息
+            var queryParams = {
+                nodeType : 5,
+                typeID:0,
+                name : some['location'],
+                keyword:'车位'
+            };
+            //查询该房间信息
+            let infor;
+            esmap.ESMapUtil.search(map, [1,2], queryParams, function (e) {
+                infor=e[0];
+                planroute(e[0].mapCoord.x,e[0].mapCoord.y,e[0].FloorNum,12728400.7413333,3551647.8182984,1);
+            })
+            let xhr=new XMLHttpRequest();
+            xhr.open('post','/userfreepark',true);
+            xhr.setRequestHeader('Content-Type','application/json');
+            let obj={
+                name:some['name'],
+                location:some['location']
+            }
+            xhr.send(JSON.stringify(obj));
+            xhr.onreadystatechange=function(){
+                if(xhr.readyState==4&&xhr.status==200){
+                    some['location']=null;
+                    console.log('离开车位成功');
+                    map.changeModelColor({name:infor.name,FloorNum:infor.FloorNum,color:'green'});
+                    map.change3dColor({name:infor.name,FloorNum:infor.FloorNum,color:'green'});
+                    cer_display.innerText='';
+                    navigate.style.display='none';
+                    leave.style.display='none';
+                }
+            }
+        }
+
+        function ajaxFun(name,fnum,status){
+            let xhr=new XMLHttpRequest();
+            xhr.open('post','/userpark',true);
+            xhr.setRequestHeader('Content-Type','application/json');
+            let obj={
+                status:status,
+                name:name,
+                user:'<%= JSON.stringify(user.name) %>'.replace(new RegExp('&#34;','g'),''),
+            }
+            xhr.send(JSON.stringify(obj));
+            xhr.onreadystatechange=function(){
+                if(xhr.readyState==4&&xhr.status==200){
+                    console.log('成功');
+                    some['location']=name;
+                    map.changeModelColor({name:name,FloorNum:fnum,color:'red'});
+                    map.change3dColor({name:name,FloorNum:fnum,color:'red'});
+                    cer_display.innerText='您的车位为'+name;
+                    navigate.style.display='inline-block';
+                    leave.style.display='inline-block';
+                }
+            }
+        }
+
+        //地图点击事件
+        map.on("mapClickNode", function (event) {
+            console.log(event,event.name);
+            if(some['location']!=null){
+                //如果该用户已经选择了车位，可以导航，但下边操作都不能进行。颜色不变为黄色，保持红色
+                if(some['location']==event.name){
+                    map.changeModelColor({name:event.name,FloorNum:event.FloorNum,color:'red'});
+                    map.change3dColor({name:event.name,FloorNum:event.FloorNum,color:'red'});
+                }
+                planroute(undefined,undefined,undefined,event.hitCoord.x,event.hitCoord.y,event.FloorNum);
+                return;
+            }
+            if(event.name&&event.name.indexOf('车位')>-1){
+                //默认点击空闲车位颜色变为红色，代表选定车位，设置点击红色车位颜色不变
+                if(array[event.name]=='busy'){
+                    map.changeModelColor({name:event.name,FloorNum:event.FloorNum,color:'red'});
+                    map.change3dColor({name:event.name,FloorNum:event.FloorNum,color:'red'});
+                    console.log(event.name+'已被占用');
+                    return;
+                }else{
+                    ajaxFun(event.name,event.FloorNum,'busy');
+                    planroute(undefined,undefined,undefined,event.hitCoord.x,event.hitCoord.y,event.FloorNum);
+                }
+            }
+        });
+
+
+        //更新车位颜色
+        for(let key in array){
+            let col;
+            if(array[key]['status']=='free'){
+                if(array[key]['fnum']==1){
+                    num1++;
+                }else{
+                    num2++;
+                }
+                freenum++;
+                col='green';
+            }else{
+                busynum++;
+                col='red';
+            }
+            map.changeModelColor({name:array[key]['name'],FloorNum:array[key]['fnum'],color:col});
+            map.change3dColor({name:array[key]['name'],FloorNum:array[key]['fnum'],color:col});
+        }
+        
+        //改3d模型颜色,id,name二选择一，都可以是数组, fnum可选择，参数color:'#FF0000'
+        map.change3dColor({name:['车位'],FloorNum:[2],color:'red'});
+        map.changeModelColor({name:['车位'],FloorNum:[2],color:'red'});
+        busynum+=3;
+        allnum.innerText=freenum;
+        b1num.innerText=num2;
+        b2num.innerText=num1;
+    });
+
+    //***声明放大、缩小控件配置参数***
+    var ctlOpt1 = new esmap.ESControlOptions({
+        position: 1, //位置 左上角
+        //位置x,y的偏移量
+        offset: {
+            // x: 30,
+            y: 120
+        }, 
+        imgURL: "/parkmap/BaseMap/image/wedgets/"
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册</title>
+    <script src="/javascripts/index.js"></script>
+    <link rel='stylesheet' href="/stylesheets/bootstrap.css">
+    <link rel='stylesheet' href="/stylesheets/signup.css">
+</head>
+<body>
+    <form method="post" action="/dosignup">
+        <p style="margin:5rem;font-size: 5rem;font-weight: bold;">注册</p>
+        <hr/>
+        <div class="formdiv">
+            <label class="sameName" for="username">姓名</label>
+            <input type="text" id="username" name="username">
+        </div>
+        <div class="formdiv">
+            <label class="sameName" for="phone">电话</label>
+            <input type="text" id="phone" name="phone">
+        </div>
+        <div class="formdiv">
+            <label class="sameName" for="idcard">身份证</label>
+            <input type="text" id="idcard" name="idcard">
+        </div>
+        <div class="formdiv">
+            <label class="sameName" for="carnum">车牌号</label>
+            <input type="text" id="carnum" name="carnum">
+        </div>
+        <div class="formdiv">
+            <label class="sameName" for="password">密码</label>
+            <input type="password" id="password" name="password">
+        </div>
+        <br/>
+        <div style="width:100rem;text-align: right;">
+            <button onclick="signFun()" class="btn-primary" type="submit" style="margin-right:3rem;font-size: 4rem;padding: 2rem 4rem;border-radius: 8px;">注册</button>
+            <input type="button" value="返回" onclick="location.href='http://localhost:8000'"/>
+        </div>
+    </form>
+</body>
+</html>

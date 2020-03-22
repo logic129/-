@@ -1,0 +1,21 @@
+div label{
+    font-size: 4rem;
+    font-weight: bolder;
+}
+.formdiv{
+    margin-top: 2rem;
+}
+.formdiv input{
+    width: 65rem;
+}
+input{
+    padding: 2rem 4rem;
+    font-size: 4rem;
+    margin-right: 15rem;
+    border-radius: 8px;
+}
+.sameName{
+    margin-right: 3rem;
+    width: 15rem;
+    text-align: right;
+}

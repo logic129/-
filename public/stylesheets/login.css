@@ -1,0 +1,24 @@
+form{
+    font-size: 4rem;
+    font-weight: bold;
+}
+div{
+    margin: 2rem 2rem;
+}
+.formdiv{
+    margin-top: 2rem;
+}
+option{
+    font-size: 4rem;
+}
+input{
+    padding: 2rem 4rem;
+    font-size: 4rem;
+    margin-right: 15rem;
+    border-radius: 8px;
+}
+.sameName{
+    margin-right: 3rem;
+    width: 15rem;
+    text-align: right;
+}

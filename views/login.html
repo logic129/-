@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="/javascripts/index.js"></script>
+    <link rel='stylesheet' href="/stylesheets/bootstrap.css">
+    <link rel='stylesheet' href="/stylesheets/login.css">
+</head>
+<body>
+    <form method="post" action="/dologin">
+        <p style="margin:5rem;font-size: 5rem;font-weight: bold;">登录</p>
+        <hr/>
+        <div class="formdiv">
+            <label class="sameName" for="username">用户名</label>
+            <input style="font-weight: normal;" placeholder="请输入手机号" type="text" id="username" name="username">
+        </div>
+        <div class="formdiv">
+            <label class="sameName" for="password">密码</label>
+            <input type="password" id="password" name="password">
+        </div>
+        <br/>
+        <div style="width:100rem;text-align: right;">
+            <button type="submit" class="btn-primary" style="margin-right:3rem;font-size: 4rem;padding: 2rem 4rem;border-radius: 8px;">登录</button>
+            <input type="button" value="返回" onclick="location.href='http://localhost:8000'"/>
+        </div>
+    </form>
+</body>
+</html>

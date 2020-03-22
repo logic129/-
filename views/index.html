@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel='stylesheet' href="/stylesheets/bootstrap.css">
+    <style>
+      #main_title{
+        font-size: 15rem;;
+        font-weight: bold;
+      }
+      input{
+        padding: 3rem 6rem;
+        font-size: 11rem;
+        margin-right: 12rem;
+        border-radius: 10px;
+      }
+    </style>
+    <script src="/javascripts/index.js"></script>
+  </head>
+  <body>
+    <p style="text-align: center;margin-top: 20rem;" id="main_title">Welcome to <%= title %></p>
+    <p style="height: 9rem;"></p>
+    <div style="width:100rem;margin: 0 auto;">
+        <input type="button" onclick="location.href='http://localhost:8000/login'" value="登录" class="btn-primary"/>
+        <input type="button" onclick="location.href='http://localhost:8000/signup'" value="注册" class="btn-danger "/>
+    </div>
+  </body>
+</html>
